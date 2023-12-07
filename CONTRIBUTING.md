@@ -5,21 +5,52 @@ email, or any other method with the owners of this repository before making a ch
 
 Please note we have a code of conduct, please follow it in all your interactions with the project.
 
-## Commit message format
+## How to Contribute
 
-**semantic-release** uses the commit messages to determine the type of changes in the codebase. Following formalized conventions for commit messages, **semantic-release** automatically determines the next [semantic version](https://semver.org) number, generates a changelog and publishes the release.
+1. Fork the repository to your GitHub account.
+2. Clone the project to your local machine.
+3. Create a new branch for your feature or fix:
 
-By default **semantic-release** uses [Angular Commit Message Conventions](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines). The commit message format can be changed with the [`preset` or `config` options](docs/usage/configuration.md#options) of the [@semantic-release/commit-analyzer](https://github.com/semantic-release/commit-analyzer#options) and [@semantic-release/release-notes-generator](https://github.com/semantic-release/release-notes-generator#options) plugins.
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-Tools such as [commitizen](https://github.com/commitizen/cz-cli) or [commitlint](https://github.com/conventional-changelog/commitlint) can be used to help contributors and enforce valid commit messages.
+4. Implement your changes and ensure that the tests pass.
+5. Commit your changes:
 
-Here is an example of the release type that will be done based on a commit messages:
+   ```bash
+   git commit -am 'Add some feature'
+   ```
 
-| Commit message                                                                                                                                                                                   | Release type               |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
-| `fix(pencil): stop graphite breaking when too much pressure applied`                                                                                                                             | Patch Release              |
-| `feat(pencil): add 'graphiteWidth' option`                                                                                                                                                       | ~~Minor~~ Feature Release  |
-| `perf(pencil): remove graphiteWidth option`<br><br>`BREAKING CHANGE: The graphiteWidth option has been removed.`<br>`The default graphite width of 10mm is always used for performance reasons.` | ~~Major~~ Breaking Release |
+6. Push to the branch:
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+7. Create a new pull request from your forked repository's branch to the main repository's `master` branch.
+
+**Note:** Be sure to follow our [Code of Conduct](link-to-code-of-conduct) and [Contributor License Agreement](link-to-CLA) if we have one.
+
+## Releases and Semantic Versioning
+
+We use GitHub's releases feature and semantic versioning for managing releases for our project. Here's how to create releases and use specific version tags for working with npm semantic versioning:
+
+1. To create a new release, go to the "Releases" tab in the GitHub repository.
+
+2. Click on the "Draft a new release" button.
+
+3. In the "Tag version" field, enter your specific semver-formatted tag (e.g., v1.0.0) for the release.
+
+4. Enter a release title and description to provide details about this release.
+
+5. Click "Publish release" to create the release.
+
+With this process, we ensure that every release in this project corresponds to a semantic versioning tag and a corresponding release on GitHub.
+
+Thank you for your interest in contributing to [Your Project Name]!
+
+If you have any questions, feel free to [contact us](link-to-contact). We look forward to working with you!
 
 ## Pull Request Process
 
