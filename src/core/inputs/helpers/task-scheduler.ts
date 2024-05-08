@@ -24,7 +24,7 @@ export interface ScheduleConfig {
    * This variable controls the max length of that queue
    **/
   defaultMaxPerTaskQueueLength?: number; // Default to Infinity
-  timezoneConfig?: 'local' | 'utc'; // Local or utc time (Defaults to utc)
+  timezoneConfig?: 'local' | 'utc' | string; // Local or utc time (Defaults to utc)
   tasks: TaskConfig[]; // List of tasks
 }
 export interface TaskConfig {
@@ -68,6 +68,7 @@ export default class TaskScheduler {
   private schedulerConfig: ScheduleConfig;
   private taskList: Task[];
   private isStarted: boolean;
+  private specificTimezone?: string;
   private scheduledFn: (task: Task) => Promise<any>;
 
   /**
@@ -89,12 +90,16 @@ export default class TaskScheduler {
     this.scheduledFn = scheduledFn;
     this.logger?.debug('TaskScheduler -> constructor');
 
-    switch (schedulerConfig.timezoneConfig) {
+    switch ((schedulerConfig.timezoneConfig || 'utc').toLowerCase()) {
       case 'local':
         later.date.localTime();
         break;
       case 'utc':
         later.date.UTC();
+        break;
+      default:
+        later.date.localTime();
+        this.specificTimezone = schedulerConfig.timezoneConfig;
         break;
     }
 
@@ -170,7 +175,7 @@ export default class TaskScheduler {
       task.handle = later.setInterval(() => {
         // Add task to the queue to make sure we only run 1 of the same task at a time
         this._addToTaskQueue(task);
-      }, task.schedule);
+      }, task.schedule, this.specificTimezone);
     }
   }
 
@@ -247,12 +252,47 @@ export default class TaskScheduler {
         throw new Error('Invalid schedule');
       }
 
+    // This next blob came from the later.js library to calculate the real next value for a given timezone
+    // this is a workaround for the library only partially supporting timezones
+    // Specifically setInterval and setTimeout support timezones but next does not
+    const next = (() => {
+      const date = new Date();
+      const now = date.getTime();
+      const s = later.schedule(schedule);
+      const timezone = this.specificTimezone;
+      if (!timezone || ['local', 'system'].includes(timezone)) {
+        return s.next(2, now);
+      }
+
+      const localOffsetMillis = date.getTimezoneOffset() * 6e4;
+      const offsetMillis = this._getOffset(date, timezone);
+
+      // Specified timezone has the same offset as local timezone.
+      // ie. America/New_York = America/Nassau = GMT-4
+      if (offsetMillis === localOffsetMillis) {
+        return s.next(2, now);
+      }
+
+      // Offsets differ, adjust current time to match what
+      // it should've been for the specified timezone.
+      const adjustedNow = new Date(now + localOffsetMillis - offsetMillis);
+
+      return (s.next(2, adjustedNow) as Date[] || /* istanbul ignore next */ []).map(
+        (sched: any) => {
+          // adjust scheduled times to match their intended timezone
+          // ie. scheduled = 2021-08-22T11:30:00.000-04:00 => America/New_York
+          //     intended  = 2021-08-22T11:30:00.000-05:00 => America/Mexico_City
+          return new Date(sched.getTime() + offsetMillis - localOffsetMillis);
+        }
+      );
+    })();
+
       this.logger?.debug(
         'TaskScheduler -> _addToInternalTaskList - task: ',
         taskConfig.name,
         ' - interval: ',
         taskConfig.intervalText || taskConfig.intervalCron,
-        ` - Next Schedules: ${later.schedule(schedule).next(1)}`
+        ` - Next Schedules: ${next}`
       );
 
       this.taskList.push({
@@ -272,5 +312,24 @@ export default class TaskScheduler {
       );
       throw err;
     }
+  }
+
+  // This function is used to get the offset between the local timezone and the specified timezone
+  // This is a workaround for the later.js library not fully supporting timezones
+  // This code was taken from the later.js library because it partially supports timezones
+  private _getOffset(date: Date, zone: string) {
+    const d = (date as any).toLocaleString('en-US', {
+        hour12: false,
+        timeZone: zone,
+        timeZoneName: 'short'
+      }) //=> ie. "8/22/2021, 24:30:00 EDT"
+      .match(/(\d+)\/(\d+)\/(\d+),? (\d+):(\d+):(\d+)/)
+      .map((n: any) => (n.length === 1 ? '0' + n : n));
+
+    const zdate = new Date(
+      `${d[3]}-${d[1]}-${d[2]}T${d[4].replace('24', '00')}:${d[5]}:${d[6]}Z`
+    );
+
+    return date.getTime() - zdate.getTime();
   }
 }

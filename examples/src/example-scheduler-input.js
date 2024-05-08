@@ -33,7 +33,16 @@ const coreScheduledInput = new CoreInputScheduler(
     // This limits the queue size. The queue used for tasks will not grow beyond 100. 
     // For the example service, this should not come into play at all.
     defaultMaxPerTaskQueueLength: 100,
+    // timezoneConfig: 'America/New_York',
     tasks: [
+      // {
+      //   name: 'Specific time',
+      //   intervalText: 'at 3:41 pm',
+      //   input: {
+      //     directory: 'input_schedule_path/fast',
+      //     outputFilePrefix: 'scheduled-order-fast',
+      //   }, // Passed as part of the input facts in the scheduler
+      // },
       {
         name: 'Fast Orders',
         intervalText: 'every 15 seconds', // Could use intervalCron as an alternative
