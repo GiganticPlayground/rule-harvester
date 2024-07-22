@@ -48,11 +48,11 @@ export default class CoreOutputMqtt implements IOutputProvider {
         }
       } else {
         // We don't have an mqttPublishAction, so we log that.
-        this.logger?.error(
-          `CoreOutputMqtt.outputResult: Error in retrieving an mqttPublishAction from result.facts. Nothing was published.`
+        this.logger?.info(
+          `CoreOutputMqtt.outputResult: No mqttPublishAction from result.facts. Nothing was published.`
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       // Oh no! Something else. Log the error.
       this.logger?.error(
         `CoreOutputMqtt.outputResult: Error - INNER ERROR: ${e.message}`

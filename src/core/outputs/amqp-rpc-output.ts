@@ -140,7 +140,7 @@ export default class CoreOutputAmqpRpc implements IOutputProvider {
           );
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       // Oh no! Something else. Log the error.
       this.logger?.error(
         `CoreOutputAmqpRpc.outputResult: Error - INNER ERROR: ${e.message}`

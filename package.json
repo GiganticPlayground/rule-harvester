@@ -1,6 +1,6 @@
 {
   "name": "rule-harvester",
-  "version": "2.1.0",
+  "version": "2.12.6",
   "description": "RuleHarvester is a rules engine for javascript",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@breejs/later": "^4.1.0",
+    "@types/ws": "8.5.4",
     "@valtech-sd/rules-js": "^1.0.0",
     "amqp-cacoon": "^3.2.0",
     "coronado-bridge": "^2.2.0",
@@ -36,8 +37,7 @@
     "@types/chai": "^4.2.21",
     "@types/lodash": "^4.14.172",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.7.2",
-    "@types/ws": "^8.5.4",
+    "@types/node": "^16.18.103",
     "chai": "^4.3.4",
     "mocha": "^9.1.0",
     "nodemon": "^2.0.12",
@@ -45,7 +45,7 @@
     "sinon": "^11.1.2",
     "ts-node": "^10.2.1",
     "ts-sinon": "^2.0.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.6.3"
   },
   "publishConfig": {
     "access": "public"

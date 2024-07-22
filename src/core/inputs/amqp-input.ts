@@ -165,7 +165,7 @@ export default class CoreInputAmqp implements IInputProvider {
       if (this.options.ackMode === 'auto') {
         channel.ack(msg);
       }
-    } catch (e) {
+    } catch (e: any) {
       output.error = e;
       // Handle errors!
 

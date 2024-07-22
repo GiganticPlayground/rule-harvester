@@ -243,7 +243,7 @@ class HttpHandler implements IOutboundProvider {
           }
           break;
       }
-    } catch (ex) {
+    } catch (ex: any) {
       // Something threw. We pass it forward. If it's a BridgeError the bridge will
       // pass properly formatted to the http client! Otherwise, the bridge will return an http 500 with
       // ex.message.
