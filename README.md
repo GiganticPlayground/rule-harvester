@@ -104,6 +104,9 @@ The following Core Outputs are available:
   web management portal) the two properties are passed as `reply_to` and `correlation_id`. However, inside this library
   the values are exposed via Node AMQP Connection Manager as `replyTo` and `correlationId` in the `properties` of an
   AMQP message.
+- CoreOutputMqtt - Allows for the publishing of the result of a rules engine pass into an MQTT broker. When a rules
+  pass `result` is received by this output, the output looks for an mqttPublishAction object. If found, it publishes to 
+  an Topic following the details in that object.
 
 The Rule Harvester maintainers expect to continually be adding to Core Outputs. Because of that, rather than trying
 to explain each of the outputs here, you are invited to check out the ./examples/ directory of this repo. Each
