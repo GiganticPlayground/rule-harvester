@@ -144,7 +144,7 @@ declare module '@breejs/later' {
        * @param dateFrom: The earliest a valid instance can occur
        * @param dateTo: The latest a valid instance can occur
        */
-      next(numberOfInst: number, dateFrom?: Date, dateTo?: Date): Date[] | Date;
+      next(numberOfInst: number, dateFrom?: Date | number, dateTo?: Date): Date[] | Date;
 
       /**
        * Finds the next valid range or ranges of the current schedule,
@@ -520,14 +520,14 @@ declare module '@breejs/later' {
        * @param callback - A callback called after first instance of recurrence pattern.
        * @param - A recurrence instance.
        */
-      setTimeout(callback: () => void, time: ScheduleData): Timer;
+      setTimeout(callback: () => void, time: ScheduleData, timezone?: string): Timer;
       /**
        * Set interval on window using given recurrence
        *
        * @param callback - A callback called after each instance of recurrence pattern.
        * @param - A recurrence instance.
        */
-      setInterval(callback: () => void, time: ScheduleData): Timer;
+      setInterval(callback: () => void, time: ScheduleData, timezone?: string): Timer;
 
       /**
        * time period information provider.

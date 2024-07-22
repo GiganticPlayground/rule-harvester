@@ -13,17 +13,18 @@
     "url": "https://github.com/valtech-sd/rule-harvester.git"
   },
   "scripts": {
+    "prepare": "rimraf ./build && tsc",
     "start:example": "cd examples && npm run start",
     "start:example:dev": "nodemon",
     "build": "rimraf ./build && tsc",
     "test": "mocha -r ts-node/register ./tests/**/*.test.ts"
   },
   "dependencies": {
-    "@breejs/later": "^4.1.0",
     "@types/ws": "8.5.4",
+    "@breejs/later": "^4.2.0",
     "@valtech-sd/rules-js": "^1.0.0",
-    "amqp-cacoon": "^3.2.0",
-    "coronado-bridge": "^2.2.0",
+    "amqp-cacoon": "github:GiganticPlayground/amqp-cacoon#semver:^3.2.1",
+    "coronado-bridge": "github:GiganticPlayground/coronado-bridge#semver:^2.2.1",
     "lodash": "^4.17.21",
     "log4js": "^6.3.0",
     "mqtt": "^4.3.8",
