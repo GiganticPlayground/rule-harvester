@@ -5,3 +5,9 @@ export interface ICoreUdpRequest {
   remoteInfo: RemoteInfo;
   port: number;
 }
+
+export interface ICoreUdpPublishAction {
+  ip: string;
+  port: number;
+  message: string;
+}

@@ -62,10 +62,16 @@ export {
   ICoreInputSchedulerProviderOptions,
 } from './core/inputs/scheduler-input';
 
+export {
+  default as CoreInputMQTT,
+  ICoreInputMqttProviderOptions,
+} from './core/inputs/mqtt-input';
+
 // Export Core Outputs, individually since these are pick-and-choose
 export { default as CoreOutputAmqp } from './core/outputs/amqp-output';
 export { default as CoreOutputAmqpRpc } from './core/outputs/amqp-rpc-output';
 export { default as CoreOutputMQTT} from './core/outputs/mqtt-output';
+export { default as CoreOutputUdp } from './core/outputs/udp-output';
 
 // Export Core Types that are shared by various components
 // AMQP

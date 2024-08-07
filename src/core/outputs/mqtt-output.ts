@@ -44,7 +44,7 @@ export default class CoreOutputMqtt implements IOutputProvider {
           const topic = mqttPublishAction.mqttTopic;
           const message = mqttPublishAction.mqttMessage;
 
-          this.mqttClient.publish(topic, JSON.stringify(message), {retain: true});
+          this.mqttClient.publish(topic, message, {retain: true});
         }
       } else {
         // We don't have an mqttPublishAction, so we log that.
