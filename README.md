@@ -107,6 +107,9 @@ The following Core Outputs are available:
 - CoreOutputMqtt - Allows for the publishing of the result of a rules engine pass into an MQTT broker. When a rules
   pass `result` is received by this output, the output looks for an mqttPublishAction object. If found, it publishes to 
   an Topic following the details in that object.
+- CoreOutputUdp - Allows for the publishing of the result of a rules engine pass into a UDP message. When a rules
+  pass `result` is received by this output, the output looks for an udpPublishAction object. If found, it publishes to 
+  an IP following the details in that object.
 
 The Rule Harvester maintainers expect to continually be adding to Core Outputs. Because of that, rather than trying
 to explain each of the outputs here, you are invited to check out the ./examples/ directory of this repo. Each
