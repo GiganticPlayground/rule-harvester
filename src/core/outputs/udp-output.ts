@@ -41,15 +41,16 @@ export default class CoreOutputUdp implements IOutputProvider {
 
         // Now, let's loop over the array and publish each
         for (let udpPublishAction of udpPublishArray) {
-          const ip = udpPublishAction.message;
+          const ip = udpPublishAction.ip;
           const port = udpPublishAction.port;
           const message = udpPublishAction.message;
 
           this.socket.send(message, port, ip, (err) => {
-            // We don't have an udpPublishAction, so we log that.
-            this.logger?.error(
-              `CoreOutputUdp.outputResult - Error: ${err}`
-            );
+            if (err) {
+              this.logger?.error(
+                `CoreOutputUdp.outputResult - Error: ${err}`
+              );
+            }
           });
         }
       } else {
