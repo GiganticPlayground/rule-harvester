@@ -1,6 +1,6 @@
 {
   "name": "rule-harvester",
-  "version": "2.1.0",
+  "version": "2.13.0",
   "description": "RuleHarvester is a rules engine for javascript",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -20,12 +20,14 @@
     "test": "mocha -r ts-node/register ./tests/**/*.test.ts"
   },
   "dependencies": {
+    "@types/ws": "8.5.4",
     "@breejs/later": "^4.2.0",
     "@valtech-sd/rules-js": "^1.0.0",
     "amqp-cacoon": "github:GiganticPlayground/amqp-cacoon#semver:^3.2.1",
     "coronado-bridge": "github:GiganticPlayground/coronado-bridge#semver:^2.2.1",
     "lodash": "^4.17.21",
     "log4js": "^6.3.0",
+    "mqtt": "^4.3.8",
     "p-queue": "^7.3.0"
   },
   "author": "Valtech: Daniel Morris",
@@ -36,7 +38,7 @@
     "@types/chai": "^4.2.21",
     "@types/lodash": "^4.14.172",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.7.2",
+    "@types/node": "^16.18.103",
     "chai": "^4.3.4",
     "mocha": "^9.1.0",
     "nodemon": "^2.0.12",
@@ -44,7 +46,7 @@
     "sinon": "^11.1.2",
     "ts-node": "^10.2.1",
     "ts-sinon": "^2.0.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.6.3"
   },
   "publishConfig": {
     "access": "public"

@@ -122,15 +122,14 @@ export default class CoreOutputAmqp implements IOutputProvider {
         }
       } else {
         // We don't have an amqpPublishAction, so we log that.
-        this.logger?.error(
-          `CoreOutputAmqp.outputResult: Error in retrieving an amqpPublishAction from result.facts. Nothing was published.`
+        this.logger?.info(
+          `CoreOutputAmqp.outputResult: No amqpPublishAction from result.facts. Nothing was published.`
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       // Oh no! Something else. Log the error.
       this.logger?.error(
-        `CoreOutputAmqp.outputResult: Error - INNER ERROR: ${e.message}`
-      );
+        `CoreOutputAmqp.outputResult: Error - INNER ERROR: ${e.message}`);
     }
 
     this.logger?.trace(`CoreOutputAmqp.outputResult: End`);

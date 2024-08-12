@@ -71,9 +71,9 @@ export default class CoreInputUdpProvider implements IInputProvider {
 
       // 2. If we are not already setup then loop over every configured port
       for (let p of this.udpPorts) {
-        // Configure then Start up a new instance of the Udp Bridge (note, this wires in the handler!)
+        // Configure then Start up a new instance of the Udp Bridge
         // 3. for every configured port create udp socket
-        let socket = dgram.createSocket('udp4', this.udpHandler);
+        let socket = dgram.createSocket('udp4');
         this.logger?.trace(
           `CoreInputUdp.registerHandler: Starting server on port ${p}`
         );
@@ -91,7 +91,9 @@ export default class CoreInputUdpProvider implements IInputProvider {
           );
         });
         // 6. for every configured port setup message handler
-        socket.on('message', this.udpHandler.bind(this));
+        socket.on('message', (msg: Buffer, rinfo: RemoteInfo) => {
+          this.udpHandler(msg, p, rinfo);
+        });
         // 7. for every configured port save the socket for later removal if we ever unregisterInput
         this.udpServer.push(socket);
       }
@@ -110,13 +112,14 @@ export default class CoreInputUdpProvider implements IInputProvider {
    * 2. Optionaly call inputContextCallback if it is defined to build a context
    * 3. Pass input facts and context to the rules engine
    */
-  async udpHandler(msg: Buffer, rinfo: RemoteInfo) {
+  async udpHandler(msg: Buffer, port: number, rinfo: RemoteInfo) {
     this.logger?.trace(`CoreInputUdp.udpHandler: Start`);
     try {
       //  1. Build input facts
       let input: ICoreUdpRequest = {
         body: msg.toString(),
         remoteInfo: rinfo,
+        port
       };
 
       // And an object for our context
