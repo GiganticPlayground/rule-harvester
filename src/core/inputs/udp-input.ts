@@ -5,6 +5,7 @@ import dgram, { RemoteInfo, Socket } from 'node:dgram';
 // Bring in rule-harvester dependencies
 import { IInputProvider, ILogger } from '../../types';
 import { ICoreUdpRequest } from '../types/udp-types';
+import { default as util } from 'util';
 
 // Export an interface to hold our provider options
 export interface ICoreInputUdpProviderOptions {
@@ -122,6 +123,9 @@ export default class CoreInputUdpProvider implements IInputProvider {
         port
       };
 
+      this.logger?.debug(
+        `CoreInputUdp.udpHandler - udpMessage: ${util.inspect(input)}`
+      );
       // And an object for our context
       let context: any = {};
 
