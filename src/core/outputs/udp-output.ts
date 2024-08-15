@@ -51,6 +51,10 @@ export default class CoreOutputUdp implements IOutputProvider {
                 `CoreOutputUdp.outputResult - Error: ${err}`
               );
             }
+            
+            this.logger?.info(
+              `CoreOutputUdp.outputResult: Message published to ip='${ip}' port='${port} message='${message}'.`
+            );
           });
         }
       } else {

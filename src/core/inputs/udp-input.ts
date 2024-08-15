@@ -5,6 +5,7 @@ import dgram, { RemoteInfo, Socket } from 'node:dgram';
 // Bring in rule-harvester dependencies
 import { IInputProvider, ILogger } from '../../types';
 import { ICoreUdpRequest } from '../types/udp-types';
+import { default as util } from 'util';
 
 // Export an interface to hold our provider options
 export interface ICoreInputUdpProviderOptions {
@@ -90,10 +91,19 @@ export default class CoreInputUdpProvider implements IInputProvider {
             `CoreInputUdp.registerHandler: Server listening on ${address.family} ${address.address}:${address.port}`
           );
         });
-        // 6. for every configured port setup message handler
+        // 6. for every configured port setup message handler, error and drop handlers
         socket.on('message', (msg: Buffer, rinfo: RemoteInfo) => {
           this.udpHandler(msg, p, rinfo);
         });
+
+        socket.on('error', (error) => {
+          this.logger?.error(`CoreInputUdp: UDP server error on port ${p}:`, error);
+        });
+
+        socket.on('drop', () => {
+          this.logger?.trace(`CoreInputUdp: Packet dropped on port ${p} due to full buffer`);
+        });
+
         // 7. for every configured port save the socket for later removal if we ever unregisterInput
         this.udpServer.push(socket);
       }
@@ -122,6 +132,9 @@ export default class CoreInputUdpProvider implements IInputProvider {
         port
       };
 
+      this.logger?.debug(
+        `CoreInputUdp.udpHandler - udpMessage: ${util.inspect(input)}`
+      );
       // And an object for our context
       let context: any = {};
 
