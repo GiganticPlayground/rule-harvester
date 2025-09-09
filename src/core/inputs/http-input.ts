@@ -1,15 +1,15 @@
 // Bring in package dependencies
-import _ from 'lodash';
+import _ from "lodash";
 import CoronadoBridge, {
   IBridgeConfig,
   IOutboundProvider,
   OutboundResponse,
-} from 'coronado-bridge';
+} from "coronado-bridge";
 
 // Bring in rule-harvester dependencies
-import { IInputProvider, ILogger } from '../../types';
-import { ICoreHttpRequest } from '../types/http-types';
-import * as http from 'http';
+import { IInputProvider, ILogger } from "../../types";
+import { ICoreHttpRequest } from "../types/http-types";
+import * as http from "http";
 
 /**
  * CoreInputHttpResponseType os an enum for use in the responseMode property of
@@ -34,7 +34,7 @@ export enum CoreInputHttpResponseType {
 // Export an interface to hold our provider options
 export interface ICoreInputHttpProviderOptions {
   responseMode: CoreInputHttpResponseType;
-  responseTimeoutMs?:number;
+  responseTimeoutMs?: number;
   staticHttpResponse?: OutboundResponse;
   inputContextCallback?: (req: ICoreHttpRequest) => void;
   jsonParsingOptions?: {
@@ -58,7 +58,7 @@ export interface ICoreInputHttpProviderOptions {
      */
     origin?: any;
     // Other keys we are alowing but not defining here
-    [key:string]: any
+    [key: string]: any;
   };
 }
 
@@ -76,13 +76,13 @@ export default class CoreInputHttp implements IInputProvider {
    * This function sets class level variables.
    *
    * @param httpPorts - an array of numbers, the ports to start HTTP servers on.
-   * @param logger - a logger instance to use for logging. 
+   * @param logger - a logger instance to use for logging.
    * @param options
    **/
   constructor(
     httpPorts: Array<number>,
     logger: ILogger | undefined,
-    options: ICoreInputHttpProviderOptions
+    options: ICoreInputHttpProviderOptions,
   ) {
     this.alreadyRegistered = false;
     // Save the constructor parameters to local class variables
@@ -107,7 +107,7 @@ export default class CoreInputHttp implements IInputProvider {
    * @returns Promise<void>
    **/
   async registerInput(
-    applyInputCb: (input: any, context: any) => Promise<any>
+    applyInputCb: (input: any, context: any) => Promise<any>,
   ) {
     this.logger?.trace(`CoreInputHttp.registerHandler: Start`);
 
@@ -124,7 +124,8 @@ export default class CoreInputHttp implements IInputProvider {
         jsonParsingOptions: this.options.jsonParsingOptions,
         corsOptions: this.options.corsOptions,
       };
-      if (this.options.responseTimeoutMs) bridgeConfig.requestTimeoutMs = this.options.responseTimeoutMs;
+      if (this.options.responseTimeoutMs)
+        bridgeConfig.requestTimeoutMs = this.options.responseTimeoutMs;
 
       this.httpBridge = new CoronadoBridge(bridgeConfig);
       // Keep track so that we only register one http bridge
@@ -136,8 +137,9 @@ export default class CoreInputHttp implements IInputProvider {
   async unregisterInput() {
     return new Promise<void>((resolve, reject) => {
       try {
-        this.httpBridge.close();
-        resolve();
+        this.httpBridge.close(() => {
+          resolve();
+        });
       } catch (e) {
         reject(e);
       }
@@ -165,7 +167,7 @@ class HttpHandler implements IOutboundProvider {
   constructor(
     applyInputCb: (input: any, context: any) => Promise<any>,
     logger: ILogger | undefined,
-    options: ICoreInputHttpProviderOptions
+    options: ICoreInputHttpProviderOptions,
   ) {
     this.applyInputCb = applyInputCb;
     this.logger = logger;
@@ -248,7 +250,7 @@ class HttpHandler implements IOutboundProvider {
       // pass properly formatted to the http client! Otherwise, the bridge will return an http 500 with
       // ex.message.
       this.logger?.trace(
-        `CoreInputHttp HttpHandler - Received error - ${ex.message}`
+        `CoreInputHttp HttpHandler - Received error - ${ex.message}`,
       );
       throw ex;
     }
@@ -274,7 +276,11 @@ class HttpHandler implements IOutboundProvider {
     // we respond wih that! If it's empty or just undefined, the http bridge will just respond
     // with http 200 and an empty body!  The http bridge will also always respond with 200 if
     // this is not an instanceof OutboundResponse.
-    return new OutboundResponse(result.httpResponseAction.body, result.httpResponseAction.status, result.httpResponseAction.headers);
+    return new OutboundResponse(
+      result.httpResponseAction.body,
+      result.httpResponseAction.status,
+      result.httpResponseAction.headers,
+    );
   }
 
   /**
@@ -288,12 +294,14 @@ class HttpHandler implements IOutboundProvider {
    */
   private callRulesWithoutWaitingForResponse(
     req: ICoreHttpRequest,
-    context: any
+    context: any,
   ) {
     // Since we're not "waiting" here for the Rules Engine pass, we catch any errors and log
     // This solves an issue where a promise error would go unhandled.
-    this.applyInputCb({ httpRequest: req }, context).catch(err => this.logger?.trace(
-      `CoreInputHttp HttpHandler, callRulesWithoutWaitingForResponse - Received error from applyInputCb - ${err.message}`
-    ));
+    this.applyInputCb({ httpRequest: req }, context).catch((err) =>
+      this.logger?.trace(
+        `CoreInputHttp HttpHandler, callRulesWithoutWaitingForResponse - Received error from applyInputCb - ${err.message}`,
+      ),
+    );
   }
 }
