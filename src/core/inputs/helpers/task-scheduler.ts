@@ -140,15 +140,19 @@ export default class TaskScheduler {
    * @params none
    * return undefined
    **/
-  stop() {
+  async stop() {
     // Start the scheduler
     if (this.isStarted) {
       this.logger?.debug('TaskScheduler -> start - Stopping all tasks');
 
       // Schedule the actual tasks
+      let allPromiseQueues = [];
       for (let idx in this.taskList) {
         this.taskList[idx]?.handle?.clear();
+        allPromiseQueues.push(this.taskList[idx].promiseQueue.onIdle());
       }
+      // Wait for all tasks to complete
+      await Promise.all(allPromiseQueues);
       this.isStarted = false;
     } else {
       this.logger?.debug('TaskScheduler -> start - Tasks already stopped');

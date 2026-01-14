@@ -112,14 +112,7 @@ export default class CoreInputSchedulerProvider implements IInputProvider {
   }
 
   async unregisterInput() {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        this.scheduler.stop();
-        this.alreadyRegistered = false;
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
+    await this.scheduler.stop();
+    this.alreadyRegistered = false;
   }
 }
