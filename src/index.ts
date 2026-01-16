@@ -5,10 +5,10 @@ import {
   ICorpusRuleGroup,
   IClosure,
   ILogger,
-} from './types';
+} from "./types";
 //@ts-ignore
-import Engine from '@valtech-sd/rules-js';
-import _ from 'lodash';
+import Engine from "@valtech-sd/rules-js";
+import _ from "lodash";
 
 export interface IRuleHarvesterProviders {
   inputs: IInputProvider[];
@@ -24,66 +24,66 @@ export interface IRuleHarvesterConfig {
   closureHandlerWrapper?: (
     facts: any,
     context: any,
-    handler: (facts: any, context: any) => any | Promise<any>
+    handler: (facts: any, context: any) => any | Promise<any>,
   ) => any | Promise<any>;
   fieldDereferenceChar?: string;
 }
 
-export * from './types';
+export * from "./types";
 
-export * from './generators';
+export * from "./generators";
 
 // Export Core Closures, Both as a single export and as individuals for flexibility
-export { default as CoreClosures } from './core/closures/index';
-export { default as CoreConditionals } from './core/closures/conditionals';
-export { default as CoreTransformations } from './core/closures/transformations';
-export { default as CoreErrorHandling } from './core/closures/error-handling';
-export { default as CoreErrorHandlingHttp } from './core/closures/error-handling-http';
+export { default as CoreClosures } from "./core/closures/index";
+export { default as CoreConditionals } from "./core/closures/conditionals";
+export { default as CoreTransformations } from "./core/closures/transformations";
+export { default as CoreErrorHandling } from "./core/closures/error-handling";
+export { default as CoreErrorHandlingHttp } from "./core/closures/error-handling-http";
 
 // Export Core Inputs, individually since these are pick-and-choose
 export {
   default as CoreInputAmqp,
   ICoreInputAmqpProviderOptions,
-} from './core/inputs/amqp-input';
+} from "./core/inputs/amqp-input";
 
 export {
   default as CoreInputHttp,
   ICoreInputHttpProviderOptions,
   CoreInputHttpResponseType,
-} from './core/inputs/http-input';
+} from "./core/inputs/http-input";
 
 export {
   default as CoreInputUdp,
   ICoreInputUdpProviderOptions,
-} from './core/inputs/udp-input';
+} from "./core/inputs/udp-input";
 
 export {
   default as CoreInputScheduler,
   ICoreInputSchedulerProviderOptions,
-} from './core/inputs/scheduler-input';
+} from "./core/inputs/scheduler-input";
 
 export {
   default as CoreInputMQTT,
   ICoreInputMqttProviderOptions,
-} from './core/inputs/mqtt-input';
+} from "./core/inputs/mqtt-input";
 
 // Export Core Outputs, individually since these are pick-and-choose
-export { default as CoreOutputAmqp } from './core/outputs/amqp-output';
-export { default as CoreOutputAmqpRpc } from './core/outputs/amqp-rpc-output';
-export { default as CoreOutputMQTT} from './core/outputs/mqtt-output';
-export { default as CoreOutputUdp } from './core/outputs/udp-output';
+export { default as CoreOutputAmqp } from "./core/outputs/amqp-output";
+export { default as CoreOutputAmqpRpc } from "./core/outputs/amqp-rpc-output";
+export { default as CoreOutputMQTT } from "./core/outputs/mqtt-output";
+export { default as CoreOutputUdp } from "./core/outputs/udp-output";
 
 // Export Core Types that are shared by various components
 // AMQP
-export * from './core/types/amqp-types';
+export * from "./core/types/amqp-types";
 // HTTP
-export * from './core/types/http-types';
+export * from "./core/types/http-types";
 // UDP
-export * from './core/types/udp-types';
+export * from "./core/types/udp-types";
 // Scheduler
-export * from './core/types/scheduler-types';
+export * from "./core/types/scheduler-types";
 // MQTT
-export * from './core/types/mqtt-types';
+export * from "./core/types/mqtt-types";
 
 // Export RuleHarvester
 export default class RuleHarvester {
@@ -91,15 +91,15 @@ export default class RuleHarvester {
   config: IRuleHarvesterConfig;
   engine: any;
   logger?: ILogger;
-  fieldDereferenceChar: string = '^';
+  fieldDereferenceChar: string = "^";
   ruleGroups: string[];
   extraContext?: object | null;
   forbiddenExtraContext: string[] = [
-    'engine',
-    'parameters',
-    'rulesFired',
-    'currentRuleFlowActivated',
-    'fact',
+    "engine",
+    "parameters",
+    "rulesFired",
+    "currentRuleFlowActivated",
+    "fact",
   ];
 
   /*****************************
@@ -146,9 +146,9 @@ export default class RuleHarvester {
     if (_.isString(originalValue)) {
       newValue = this.dereferenceString(facts, originalValue);
     } else if (_.isArray(originalValue)) {
-      newValue = this.dereferenceArray(facts, originalValue);
+      newValue = this.dereferenceArray(facts, [...originalValue]);
     } else if (_.isObject(originalValue)) {
-      newValue = this.dereferenceObject(facts, originalValue);
+      newValue = this.dereferenceObject(facts, { ...(originalValue ?? {}) });
     }
     return newValue;
   }
@@ -188,7 +188,7 @@ export default class RuleHarvester {
   public defaultClosureHandlerWrapper(
     name: string,
     handler: (facts: any, context: any) => any | Promise<any>,
-    options?: any
+    options?: any,
   ): (facts: any, context: any) => any | Promise<any> {
     return async (factsAndOrRunContext: any, context: any) => {
       // _.defaults overrides if a value does not already exist
@@ -221,22 +221,9 @@ export default class RuleHarvester {
         contextExt.closureName = name;
         contextExt.closureOptions = options;
 
-        contextExt.parameters = this.dereferenceObject(
-          facts,
-          _.cloneDeep(contextExt.parameters)
-        );
-        // let parameterKeys = Object.keys(contextExt.parameters || {});
-        // for (let i = 0; i < parameterKeys.length; i++) {
-        //   const key = parameterKeys[i];
-        //   if (key.charAt(0) === this.fieldDereferenceChar) {
-        //     const newKey = parameterKeys[i].substr(1);
-        //     contextExt.parameters[newKey] = _.get(
-        //       facts,
-        //       contextExt.parameters[key]
-        //     );
-        //     delete contextExt.parameters[key];
-        //   }
-        // }
+        contextExt.parameters = this.dereferenceObject(facts, {
+          ...(contextExt?.parameters ?? {}),
+        });
 
         result = this.config.closureHandlerWrapper // closureHandlerWrapper exist
           ? await this.config.closureHandlerWrapper(facts, contextExt, handler) // then call wrapper function
@@ -254,7 +241,7 @@ export default class RuleHarvester {
         if (this.logger) {
           this.logger.error(
             `RuleHarvester.defaultClosureHandlerWrapper - Closure Name: ${name} - Error: `,
-            e
+            e,
           );
         }
         throw e;
@@ -278,7 +265,7 @@ export default class RuleHarvester {
       result.handler = this.defaultClosureHandlerWrapper(
         closure.name,
         closure.handler,
-        closure.options
+        closure.options,
       );
     }
     return result;
@@ -312,17 +299,17 @@ export default class RuleHarvester {
       this.logger = this.config.providers.logger;
       this.extraContext = this.config.extraContext;
       this.ruleGroups = [];
-      this.fieldDereferenceChar = this.config.fieldDereferenceChar || '^';
+      this.fieldDereferenceChar = this.config.fieldDereferenceChar || "^";
       // Make sure extraContext is not using forbidden fields
       let badContext = _.intersection(
         _.keys(this.extraContext),
-        this.forbiddenExtraContext
+        this.forbiddenExtraContext,
       );
       if ((badContext || []).length > 0) {
         throw new Error(
           `One of the extraContext fields specified is forbidden and could mess with the rules engine. (${badContext.join(
-            ', '
-          )})`
+            ", ",
+          )})`,
         );
       }
 
@@ -343,7 +330,7 @@ export default class RuleHarvester {
           this.engine.closures.add(
             closure.name,
             closure.handler,
-            closure.options
+            closure.options,
           );
         }
       }
@@ -358,8 +345,8 @@ export default class RuleHarvester {
     } catch (e) {
       if (this.logger) {
         this.logger.fatal(
-          'RuleHarvester - Error during harvester engine setup.',
-          e
+          "RuleHarvester - Error during harvester engine setup.",
+          e,
         );
       }
       throw e;
@@ -395,7 +382,7 @@ export default class RuleHarvester {
   async applyRule(
     input: any,
     thisRunContext: any = null,
-    ruleGroupOverrides: string[] | undefined = undefined
+    ruleGroupOverrides: string[] | undefined = undefined,
   ) {
     if (input) {
       let fact = input;
@@ -403,7 +390,7 @@ export default class RuleHarvester {
       let error = null;
       try {
         let ruleGroups = ruleGroupOverrides || this.ruleGroups;
-        ruleGroups = typeof ruleGroups === 'string' ? [ruleGroups] : ruleGroups;
+        ruleGroups = typeof ruleGroups === "string" ? [ruleGroups] : ruleGroups;
         for (group of ruleGroups) {
           // Loop over groups and set the fact from previous
           // rules group to the input fact for the next rules group
@@ -421,9 +408,9 @@ export default class RuleHarvester {
         error = e;
         if (this.logger) {
           this.logger.error(
-            'RuleHarvester - Error: An error occurred while processing rule',
+            "RuleHarvester - Error: An error occurred while processing rule",
             `GROUP: ${group}, fact: ${JSON.stringify(fact, null, 2)}`,
-            e
+            e,
           );
         }
       }
@@ -439,7 +426,7 @@ export default class RuleHarvester {
               error,
               errorGroup: error ? group : undefined,
               context: thisRunContext,
-            })
+            }),
           );
         }
         await Promise.all(proms);
@@ -447,9 +434,9 @@ export default class RuleHarvester {
         error = e;
         if (this.logger) {
           this.logger.error(
-            'RuleHarvester - Error: An error occurred while processing rule',
+            "RuleHarvester - Error: An error occurred while processing rule",
             `GROUP: ${group}, fact: ${JSON.stringify(fact, null, 2)}`,
-            e
+            e,
           );
         }
       }

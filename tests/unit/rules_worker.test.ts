@@ -511,6 +511,50 @@ describe('Rules Harvester', () => {
     });
   });
 
+  it('Closure parameter mutation does not persist across runs', async () => {
+    const seenValues: string[] = [];
+    const corpus = [
+      {
+        name: 'Mutate parameters',
+        rules: [
+          {
+            when: [{ closure: 'mutateParam', value: 'original' }],
+            then: [{ closure: 'extendFacts', 'result.mutated': true }],
+          },
+        ],
+      },
+    ];
+
+    let { config, rulesInputStub, rulesOutputStub } =
+      Utils.generateRulesHarvesterConfig({
+        corpus,
+        closures: [
+          ...Utils.closures,
+          {
+            name: 'mutateParam',
+            handler(_facts: any, context: any) {
+              seenValues.push(context.parameters.value);
+              context.parameters.value = 'mutated';
+              return true;
+            },
+          },
+        ],
+      });
+
+    let rulesHarvester = new RulesHarvester(config);
+    rulesHarvester.start();
+
+    const applyInput = rulesInputStub.registerInput.lastCall.args[0];
+
+    await applyInput({ event: { type: 'test' } });
+    await applyInput({ event: { type: 'test' } });
+
+    expect(rulesOutputStub.outputResult.called, 'outputResult was not called')
+      .to.be.true;
+
+    expect(seenValues).to.deep.equal(['original', 'original']);
+  });
+
   it('applyRule hat (^) Missing dereference', async () => {
     let runTimeContext = { runTimeContextValue: 'SomRuntimeValue' };
     const corpus = [
