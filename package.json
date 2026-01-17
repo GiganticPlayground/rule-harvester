@@ -1,6 +1,6 @@
 {
   "name": "rule-harvester",
-  "version": "2.16.1",
+  "version": "2.16.3",
   "description": "RuleHarvester is a rules engine for javascript",
   "main": "build/index.js",
   "types": "build/index.d.ts",
