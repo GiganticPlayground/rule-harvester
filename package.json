@@ -22,9 +22,9 @@
   "dependencies": {
     "@breejs/later": "^4.2.0",
     "@types/ws": "8.5.4",
-    "@valtech-sd/rules-js": "^1.0.0",
-    "amqp-cacoon": "github:GiganticPlayground/amqp-cacoon#semver:^3.4.0",
-    "coronado-bridge": "github:GiganticPlayground/coronado-bridge#semver:^2.3.0",
+    "rules-js": "github:GiganticPlayground/rules-js#semver:^1.1.1",
+    "amqp-cacoon": "github:GiganticPlayground/amqp-cacoon#semver:^3.6.0",
+    "coronado-bridge": "github:GiganticPlayground/coronado-bridge#semver:^2.4.0",
     "lodash": "^4.17.21",
     "log4js": "^6.3.0",
     "mqtt": "^4.3.8",
