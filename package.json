@@ -30,7 +30,7 @@
     "mqtt": "^4.3.8",
     "p-queue": "^7.3.0"
   },
-  "author": "Valtech: Daniel Morris",
+  "author": "Daniel Morris",
   "license": "MIT",
   "devDependencies": {
     "@types/amqp-connection-manager": "^2.0.12",
