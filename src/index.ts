@@ -177,6 +177,17 @@ export default class RuleHarvester {
     return parameters;
   }
 
+  private cloneParameterLiterals(value: any): any {
+    if (Array.isArray(value))
+      return value.map((v) => this.cloneParameterLiterals(v));
+    if (_.isPlainObject(value)) {
+      const out: any = {};
+      for (const key of Object.keys(value))
+        out[key] = this.cloneParameterLiterals(value[key]);
+      return out;
+    }
+    return value; // primitives, functions, bound closures: by reference
+  }
   /**
    * defaultClosureHandlerWrapper
    * This wraps the closure handler so that we log errors well
@@ -221,9 +232,13 @@ export default class RuleHarvester {
         contextExt.closureName = name;
         contextExt.closureOptions = options;
 
-        contextExt.parameters = this.dereferenceObject(facts, {
-          ...(contextExt?.parameters ?? {}),
-        });
+        contextExt.parameters = this.dereferenceObject(
+          facts,
+          this.cloneParameterLiterals(contextExt.parameters),
+          //   {
+          //   ...(contextExt?.parameters ?? {}),
+          // }
+        );
 
         result = this.config.closureHandlerWrapper // closureHandlerWrapper exist
           ? await this.config.closureHandlerWrapper(facts, contextExt, handler) // then call wrapper function
