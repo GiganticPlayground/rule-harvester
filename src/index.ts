@@ -181,15 +181,24 @@ export default class RuleHarvester {
   }
 
   private cloneParameterLiterals(value: any): any {
-    if (Array.isArray(value))
-      return value.map((v) => this.cloneParameterLiterals(v));
-    if (_.isPlainObject(value)) {
+    // Scalars and functions exit on one comparison — the common case. This
+    // runs on every value of every closure call, so no lodash calls here.
+    if (value === null || typeof value !== "object") return value;
+    if (Array.isArray(value)) {
+      const out = new Array(value.length);
+      for (let i = 0; i < value.length; i++)
+        out[i] = this.cloneParameterLiterals(value[i]);
+      return out;
+    }
+    // Inline _.isPlainObject: clone only plain-object literals
+    const proto = Object.getPrototypeOf(value);
+    if (proto === Object.prototype || proto === null) {
       const out: any = {};
       for (const key of Object.keys(value))
         out[key] = this.cloneParameterLiterals(value[key]);
       return out;
     }
-    return value; // primitives, functions, bound closures: by reference
+    return value; // class instances (e.g. bound closures): by reference
   }
   /**
    * defaultClosureHandlerWrapper
