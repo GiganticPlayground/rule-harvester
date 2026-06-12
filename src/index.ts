@@ -94,6 +94,9 @@ export default class RuleHarvester {
   fieldDereferenceChar: string = "^";
   ruleGroups: string[];
   extraContext?: object | null;
+  // Precomputed in setup() so the per-closure-call merge below doesn't pay
+  // lodash _.defaults machinery (rest args, keysIn allocation) on every call
+  private extraContextEntries: [string, any][] = [];
   forbiddenExtraContext: string[] = [
     "engine",
     "parameters",
@@ -177,6 +180,26 @@ export default class RuleHarvester {
     return parameters;
   }
 
+  private cloneParameterLiterals(value: any): any {
+    // Scalars and functions exit on one comparison — the common case. This
+    // runs on every value of every closure call, so no lodash calls here.
+    if (value === null || typeof value !== "object") return value;
+    if (Array.isArray(value)) {
+      const out = new Array(value.length);
+      for (let i = 0; i < value.length; i++)
+        out[i] = this.cloneParameterLiterals(value[i]);
+      return out;
+    }
+    // Inline _.isPlainObject: clone only plain-object literals
+    const proto = Object.getPrototypeOf(value);
+    if (proto === Object.prototype || proto === null) {
+      const out: any = {};
+      for (const key of Object.keys(value))
+        out[key] = this.cloneParameterLiterals(value[key]);
+      return out;
+    }
+    return value; // class instances (e.g. bound closures): by reference
+  }
   /**
    * defaultClosureHandlerWrapper
    * This wraps the closure handler so that we log errors well
@@ -190,10 +213,24 @@ export default class RuleHarvester {
     handler: (facts: any, context: any) => any | Promise<any>,
     options?: any,
   ): (facts: any, context: any) => any | Promise<any> {
-    return async (factsAndOrRunContext: any, context: any) => {
+    // Deliberately NOT an async function: rules-js continues a chain
+    // synchronously when a closure returns a non-thenable (util.nowOrThen),
+    // so fully-sync when/then chains complete with no promise allocations or
+    // microtask hops. An async wrapper would force every call onto the
+    // promise path. Async handlers still return a promise and behave as
+    // before.
+    return (factsAndOrRunContext: any, context: any) => {
       // _.defaults overrides if a value does not already exist
       // so extraContext cannot override fields that are already defined.
-      let result: any;
+      const logAndRethrow = (e: any) => {
+        if (this.logger) {
+          this.logger.error(
+            `RuleHarvester.defaultClosureHandlerWrapper - Closure Name: ${name} - Error: `,
+            e,
+          );
+        }
+        throw e;
+      };
       try {
         // Parse thisRunContext out of facts
         let thisRunContext =
@@ -217,36 +254,55 @@ export default class RuleHarvester {
           thisRunContext =
             context.rulesFired.thisRunContext_RuleHarvesterWrapped;
         }
-        let contextExt = _.defaults(context, thisRunContext, this.extraContext);
+        // Equivalent of _.defaults(context, thisRunContext, this.extraContext)
+        // without the per-call lodash overhead. Mutates context, filling only
+        // keys that resolve to undefined; thisRunContext wins over extraContext.
+        let contextExt: any = context;
+        if (thisRunContext) {
+          for (const key in thisRunContext) {
+            if (contextExt[key] === undefined) {
+              contextExt[key] = thisRunContext[key];
+            }
+          }
+        }
+        const extraEntries = this.extraContextEntries;
+        for (let i = 0; i < extraEntries.length; i++) {
+          if (contextExt[extraEntries[i][0]] === undefined) {
+            contextExt[extraEntries[i][0]] = extraEntries[i][1];
+          }
+        }
         contextExt.closureName = name;
         contextExt.closureOptions = options;
 
-        contextExt.parameters = this.dereferenceObject(facts, {
-          ...(contextExt?.parameters ?? {}),
-        });
+        contextExt.parameters = this.dereferenceObject(
+          facts,
+          this.cloneParameterLiterals(contextExt.parameters),
+          //   {
+          //   ...(contextExt?.parameters ?? {}),
+          // }
+        );
 
-        result = this.config.closureHandlerWrapper // closureHandlerWrapper exist
-          ? await this.config.closureHandlerWrapper(facts, contextExt, handler) // then call wrapper function
-          : await handler(facts, contextExt); // else call handler directly
+        const rawResult = this.config.closureHandlerWrapper // closureHandlerWrapper exist
+          ? this.config.closureHandlerWrapper(facts, contextExt, handler) // then call wrapper function
+          : handler(facts, contextExt); // else call handler directly
 
-        // If result is undefined then skip this line
-        // If this is a a direct call of a closure parameter using the closureParameters functionality then we need to skip this line
-        if (result && !isClosureParameterDirectCall) {
-          result = {
-            facts_RuleHarvesterWrapped: result,
-            thisRunContext_RuleHarvesterWrapped: thisRunContext,
-          };
+        // If result is undefined then skip wrapping
+        // If this is a a direct call of a closure parameter using the closureParameters functionality then we need to skip wrapping
+        const wrapResult = (result: any) =>
+          result && !isClosureParameterDirectCall
+            ? {
+                facts_RuleHarvesterWrapped: result,
+                thisRunContext_RuleHarvesterWrapped: thisRunContext,
+              }
+            : result;
+
+        if (rawResult && typeof rawResult.then === "function") {
+          return rawResult.then(wrapResult, logAndRethrow);
         }
+        return wrapResult(rawResult);
       } catch (e) {
-        if (this.logger) {
-          this.logger.error(
-            `RuleHarvester.defaultClosureHandlerWrapper - Closure Name: ${name} - Error: `,
-            e,
-          );
-        }
-        throw e;
+        logAndRethrow(e);
       }
-      return result;
     };
   }
 
@@ -317,6 +373,7 @@ export default class RuleHarvester {
       this.extraContext = _.defaults({}, this.extraContext || {}, {
         logger: this.logger,
       });
+      this.extraContextEntries = Object.entries(this.extraContext || {});
 
       // Instantiate rules engine
       this.engine = new Engine();
