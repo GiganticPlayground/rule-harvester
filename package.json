@@ -4,6 +4,9 @@
   "description": "RuleHarvester is a rules engine for javascript",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "engines": {
+    "node": ">=24"
+  },
   "type": "commonjs",
   "files": [
     "build/**/*"
@@ -21,32 +24,32 @@
   },
   "dependencies": {
     "@breejs/later": "^4.2.0",
-    "@types/ws": "8.5.4",
+    "@types/ws": "^8.18.2",
     "rules-js": "github:GiganticPlayground/rules-js#semver:^1.1.1",
     "amqp-cacoon": "github:GiganticPlayground/amqp-cacoon#semver:^3.6.0",
     "coronado-bridge": "github:GiganticPlayground/coronado-bridge#semver:^2.4.0",
-    "lodash": "^4.17.21",
-    "log4js": "^6.3.0",
-    "mqtt": "^4.3.8",
-    "p-queue": "^7.3.0"
+    "lodash": "^4.18.1",
+    "log4js": "^6.9.1",
+    "mqtt": "^5.16.1",
+    "p-queue": "^10.0.0"
   },
   "author": "Daniel Morris",
   "license": "MIT",
   "devDependencies": {
-    "@types/amqp-connection-manager": "^2.0.12",
-    "@types/amqplib": "^0.8.2",
-    "@types/chai": "^4.2.21",
-    "@types/lodash": "^4.14.172",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "^16.18.103",
-    "chai": "^4.3.4",
-    "mocha": "^11.0.0",
-    "nodemon": "^3.0.0",
-    "rimraf": "^3.0.2",
-    "sinon": "^11.1.2",
-    "ts-node": "^10.2.1",
-    "ts-sinon": "^2.0.1",
-    "typescript": "^4.6.3"
+    "@types/amqp-connection-manager": "^3.4.5",
+    "@types/amqplib": "^0.10.8",
+    "@types/chai": "^5.2.3",
+    "@types/lodash": "^4.17.27",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^26.6.6",
+    "chai": "^6.3.0",
+    "mocha": "^12.0.3",
+    "nodemon": "^3.1.14",
+    "rimraf": "^6.1.4",
+    "sinon": "^22.1.0",
+    "ts-node": "^10.9.2",
+    "ts-sinon": "^2.0.2",
+    "typescript": "~6.0.3"
   },
   "publishConfig": {
     "access": "public"

@@ -193,7 +193,7 @@ export default class TaskScheduler {
       // NOTE: p-queue is a es module - To use esm within commonjs module, you have to do a dynamic import. Unfortunatly, dynamic
       // imports are converted to require in typescript. Eval is a work around to force this to use a dynamic import even within typescript
       const { default: PQueue } = await (eval('import("p-queue")') as Promise<
-        typeof import('p-queue')
+        typeof import('p-queue', { with: { 'resolution-mode': 'import' } })
       >);
       task.promiseQueue = new PQueue({ concurrency: task.concurrency });
     }
