@@ -2,13 +2,16 @@
   "compilerOptions": {
     /* Basic Options */
     "target": "es6",
-    "module": "commonjs",
+    "module": "node20",
     "lib": ["es6"],
     "allowJs": true,
     // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
     "declaration": true,
     "sourceMap": true,
     "outDir": "build",
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "types": ["node", "mocha"],
     "stripInternal": true,
 
     /* Strict Type-Checking Options */
@@ -28,7 +31,7 @@
     "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
 
     /* Module Resolution Options */
-    "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
+    "moduleResolution": "node16" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     // "baseUrl": "./",                       /* Base directory to resolve non-absolute module names. */
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     "rootDirs": ["./src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
